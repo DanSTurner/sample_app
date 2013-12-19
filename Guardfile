@@ -30,6 +30,7 @@ guard 'rspec', all_after_pass: false do
     (m[1][/_pages/] ? "spec/requests/#{m[1]}_spec.rb" :
                       "spec/requests/#{m[1].singularize}_pages_spec.rb")
   end
+  watch('app/views/layouts/application.html.erb') { "spec" }
   watch(%r{^app/controllers/sessions_controller\.rb$}) do |m|
     "spec/requests/authentication_pages_spec.rb"
   end
