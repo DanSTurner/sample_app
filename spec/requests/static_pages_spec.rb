@@ -23,7 +23,7 @@ describe "Static pages" do
       let(:user) { FactoryGirl.create(:user) }
       before do
         FactoryGirl.create(:micropost, user: user, content: "Lorem ipsum")
-        FactoryGirl.create(:micropost, user: user, content: "Dolor sit amet")
+
         sign_in user
         visit root_path
       end
@@ -31,6 +31,21 @@ describe "Static pages" do
       it "should render the user's feed" do
         user.feed.each do |item|
           expect(page).to have_selector("li##{item.id}", text: item.content)
+        end
+      end
+
+      describe "in sidebar" do
+        it { should have_content "1 micropost" }
+
+        describe "with a second post" do
+          before do
+            FactoryGirl.create(:micropost, user: user, content: "Dolor sit amet")
+            visit root_path
+          end
+
+          it "should have correct pluralization" do
+            expect(page).to have_content("2 microposts")
+          end
         end
       end
     end

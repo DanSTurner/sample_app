@@ -34,12 +34,59 @@ describe "MicropostPages" do
     before { FactoryGirl.create(:micropost, user: user) }
 
     describe "as the correct user" do
-      before { visit root_path }
+      describe "at the home page" do
+        before { visit root_path }
 
-      it "should delet a micropost" do
-        expect { click_link "delete" }.to change(Micropost, :count).by(-1)
+        it "should delete a micropost" do
+          expect { click_link "delete" }.to change(Micropost, :count).by(-1)
+        end
+      end
+      describe "at the profile page" do
+        before { visit user_path(user) }
+
+        it "should delete a micropost" do
+          expect { click_link "delete" }.to change(Micropost, :count).by(-1)
+        end
       end
     end
 
+    describe "as a different user" do
+      let(:different_user) { FactoryGirl.create(:user) }
+      before do
+        sign_in different_user
+        visit user_path(user)
+      end
+
+      it { should_not have_link("delete") }
+    end
+  end
+
+  describe "micropost pagination" do
+    before { 31.times { FactoryGirl.create(:micropost, user: user) } }
+    after(:all)  { User.delete_all }
+
+    describe "on home page" do
+      before { visit root_path }
+
+      it { should have_selector('div.pagination') }
+
+      it "should list each micropost" do
+        Micropost.paginate(page: 1).each do |micropost|
+          expect(page).to have_selector('li', text: micropost.content)
+        end
+      end
+    end
+
+    describe "on profile page" do
+      before { visit user_path(user) }
+
+      it { should have_selector('div.pagination') }
+
+      it "should list each micropost" do
+        Micropost.paginate(page: 1).each do |micropost|
+          expect(page).to have_selector('li', text: micropost.content)
+        end
+      end
+    end
   end
 end
